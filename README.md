@@ -59,7 +59,27 @@ spec:
       port: 80
 ```
 
-8. (optional) Install Prometheus ServiceMonitors to collect controller and cloudflared metrics: `kubectl apply -k github.com/pl4nty/cloudflare-kubernetes-gateway//config/prometheus?ref=v0.8.2` <!-- x-release-please-version -->
+8. (optional) For HTTPS/TLS passthrough (e.g. ArgoCD UI), create a TLSRoute instead:
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TLSRoute
+metadata:
+  name: argocd-server
+  namespace: argocd
+spec:
+  parentRefs:
+  - name: gateway
+    namespace: cloudflare-gateway
+  hostnames:
+  - argocd.example.com
+  rules:
+  - backendRefs:
+    - name: argocd-server
+      port: 443
+```
+
+9. (optional) Install Prometheus ServiceMonitors to collect controller and cloudflared metrics: `kubectl apply -k github.com/pl4nty/cloudflare-kubernetes-gateway//config/prometheus?ref=v0.8.2` <!-- x-release-please-version -->
 
 ## Features
 
@@ -67,6 +87,8 @@ The v1 Core spec is not yet supported, as some features (eg header-based routing
 
 * HTTPRoute hostname and path matching
 * HTTPRoute Service backendRefs without filtering or weighting
+* TLSRoute hostname (SNI) matching with HTTPS passthrough to backends
+* TLSRoute Service backendRefs without weighting
 * Gateway gatewayClassName and listeners only
 * GatewayClass Core fields
 
